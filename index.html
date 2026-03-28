@@ -1,49 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Viral Feed</title>
-  <meta name="description" content="A fast, responsive viral feed with professional article cards and properly placed sponsored ads." />
+
+  <title>Viral Feed — V3 Ultra Premium</title>
+  <meta name="description" content="Premium viral article feed with search, category filters, bookmarks, dark mode, infinite scroll, share actions, and stable sponsored ads." />
+  <meta name="theme-color" content="#0f172a" />
+
+  <!-- Production note:
+       Replace og:url and og:image with your real domain/banner before going live -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Viral Feed — V3 Ultra Premium" />
+  <meta property="og:description" content="Premium viral feed with search, bookmarks, categories, dark mode, infinite scroll, and stable sponsored ads." />
+  <meta property="og:url" content="https://example.com/" />
+  <meta property="og:image" content="https://example.com/og-cover.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Viral Feed — V3 Ultra Premium" />
+  <meta name="twitter:description" content="Premium viral feed with search, bookmarks, categories, dark mode, infinite scroll, and stable sponsored ads." />
+  <meta name="twitter:image" content="https://example.com/og-cover.jpg" />
 
   <style>
     :root{
-      --bg: #f3f6fb;
+      --max-width: 1480px;
+      --gap: 16px;
+      --row-unit: 8px;
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-hover: 0 16px 40px rgba(15, 23, 42, 0.14);
+      --accent: #ff6b00;
+      --accent-2: #ff9f43;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --bg: #f4f7fb;
+      --bg-soft: #f8fafc;
       --card: #ffffff;
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
-      --primary: #0f172a;
-      --accent: #ff6b00;
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-      --shadow-hover: 0 14px 34px rgba(15, 23, 42, 0.14);
-      --radius: 18px;
-      --gap: 16px;
-      --row-unit: 8px;
-      --max-width: 1440px;
+      --header: rgba(15, 23, 42, 0.92);
+      --header-text: #ffffff;
+      --chip: #ffffff;
+      --chip-text: #334155;
+      --chip-border: #dbe4f0;
+      --input-bg: #ffffff;
+      --ad-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     }
 
-    * { box-sizing: border-box; }
+    html[data-theme="dark"]{
+      --bg: #0b1220;
+      --bg-soft: #111827;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: #243041;
+      --header: rgba(2, 6, 23, 0.88);
+      --header-text: #f8fafc;
+      --chip: #111827;
+      --chip-text: #e5e7eb;
+      --chip-border: #334155;
+      --input-bg: #0f172a;
+      --ad-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+      --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.34);
+    }
 
-    html { scroll-behavior: smooth; }
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; }
 
     body{
       margin:0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background:
-        radial-gradient(circle at top right, rgba(255,107,0,0.08), transparent 22%),
-        linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(255,107,0,0.09), transparent 22%),
+        linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 100%);
+      transition: background .22s ease, color .22s ease;
+    }
+
+    .top-loader{
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .top-loader-bar{
+      width: 0;
+      height: 100%;
+      opacity: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 14px rgba(255,107,0,.45);
+      transition: width .35s ease, opacity .3s ease;
     }
 
     .site-header{
       position: sticky;
       top: 0;
-      z-index: 50;
+      z-index: 100;
       backdrop-filter: blur(12px);
-      background: rgba(15, 23, 42, 0.92);
-      color: #fff;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: var(--header);
+      color: var(--header-text);
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
 
     .header-inner{
@@ -54,52 +116,65 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
+      flex-wrap: wrap;
     }
 
     .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       min-width: 0;
     }
 
-    .brand-badge{
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display:grid;
-      place-items:center;
+    .brand-icon{
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
       background: linear-gradient(135deg, #ff6b00, #ff9f43);
+      box-shadow: 0 8px 22px rgba(255,107,0,.28);
       font-size: 20px;
-      box-shadow: 0 8px 20px rgba(255,107,0,0.28);
       flex-shrink: 0;
     }
 
-    .brand-text{
-      min-width: 0;
-    }
-
     .brand-title{
-      margin:0;
+      margin: 0;
       font-size: 20px;
+      line-height: 1.05;
       font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
+      letter-spacing: -.02em;
     }
 
     .brand-subtitle{
-      margin: 3px 0 0;
-      color: rgba(255,255,255,0.72);
+      margin: 4px 0 0;
+      color: rgba(255,255,255,.74);
       font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .header-actions{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .header-pill{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .page{
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 20px 16px 36px;
+      padding: 20px 16px 48px;
     }
 
     .hero{
@@ -107,66 +182,166 @@
       align-items:flex-end;
       justify-content:space-between;
       gap:16px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
+      flex-wrap:wrap;
+      margin-bottom: 16px;
     }
 
-    .hero-copy h1{
+    .hero h1{
       margin:0;
-      font-size: clamp(24px, 3vw, 40px);
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      color: var(--primary);
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.03;
+      letter-spacing: -.03em;
+      color: var(--text);
     }
 
-    .hero-copy p{
+    .hero p{
       margin: 8px 0 0;
       color: var(--muted);
+      max-width: 820px;
       font-size: 15px;
-      max-width: 760px;
     }
 
-    .hero-chip{
-      background: rgba(255,255,255,0.92);
-      border:1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 999px;
+    .toolbar{
+      background: color-mix(in srgb, var(--card) 88%, transparent);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .toolbar-row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .toolbar-left,
+    .toolbar-right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .search-wrap{
+      position: relative;
+      min-width: 280px;
+      flex: 1 1 360px;
+    }
+
+    .search-input{
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
       color: var(--text);
-      font-size: 13px;
+      border-radius: 14px;
+      padding: 14px 44px 14px 14px;
+      font-size: 14px;
       font-weight: 600;
+      outline: none;
+    }
+
+    .search-input::placeholder{
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .search-icon{
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color: var(--muted);
+      font-size: 16px;
+      pointer-events:none;
+    }
+
+    .control-btn{
+      appearance:none;
+      border:1px solid var(--chip-border);
+      background: var(--chip);
+      color: var(--chip-text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all .18s ease;
+    }
+
+    .control-btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(15,23,42,.08);
+    }
+
+    .control-btn.active{
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 18px rgba(255,107,0,.22);
+    }
+
+    .chips{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+
+    .chip{
+      appearance:none;
+      border:1px solid var(--chip-border);
+      background: var(--chip);
+      color: var(--chip-text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor:pointer;
+      transition: all .18s ease;
+    }
+
+    .chip:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(15,23,42,.06);
+    }
+
+    .chip.active{
+      color:#fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
     }
 
     .status{
-      margin-bottom: 18px;
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
       border-radius: 16px;
       padding: 14px 16px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.82);
-      box-shadow: var(--shadow);
+      margin-bottom: 16px;
       color: var(--text);
     }
 
-    .status.hidden{
-      display:none;
-    }
+    .status.hidden{ display:none; }
 
     .status.error{
-      border-color: #fecaca;
       background: #fff1f2;
+      border-color: #fecaca;
       color: #991b1b;
     }
 
     .status.empty{
-      border-color: #e2e8f0;
-      background: #ffffff;
-      color: #334155;
+      background: var(--card);
+      color: var(--muted);
     }
 
-    .status .status-row{
+    .status-row{
       display:flex;
-      align-items:center;
       justify-content:space-between;
+      align-items:center;
       gap:12px;
       flex-wrap:wrap;
     }
@@ -174,72 +349,58 @@
     .retry-btn{
       appearance:none;
       border:none;
-      background: var(--primary);
-      color:#fff;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-weight: 700;
+      border-radius:12px;
+      background: var(--text);
+      color: var(--card);
+      padding:10px 14px;
+      font-weight:800;
       cursor:pointer;
-      transition: transform .18s ease, opacity .18s ease;
     }
-
-    .retry-btn:hover{ transform: translateY(-1px); opacity: .95; }
 
     .feed{
       display:grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: var(--gap);
       grid-auto-rows: var(--row-unit);
-      align-items: start;
+      align-items:start;
     }
 
-    .feed-item{
-      min-width: 0;
-    }
+    .feed-item{ min-width:0; }
 
     .card{
-      display:flex;
-      flex-direction:column;
       background: var(--card);
-      border: 1px solid rgba(226,232,240,0.9);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
-      overflow:hidden;
       box-shadow: var(--shadow);
-      text-decoration:none;
-      color: inherit;
-      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      overflow:hidden;
       height: fit-content;
-      will-change: transform;
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
     }
 
     .card:hover{
       transform: translateY(-4px);
       box-shadow: var(--shadow-hover);
-      border-color: #dbe4f0;
     }
 
-    .card:focus-visible{
-      outline: 3px solid rgba(255,107,0,0.35);
-      outline-offset: 3px;
-    }
-
-    .card-media{
+    .card-media-link{
+      display:block;
       position:relative;
-      background: #e5e7eb;
-      overflow:hidden;
       aspect-ratio: 4 / 3;
+      overflow:hidden;
+      background:#dbe4ee;
+      text-decoration:none;
     }
 
-    .card-media img{
+    .card-media-link img{
       width:100%;
       height:100%;
       object-fit:cover;
       display:block;
-      transition: transform .35s ease;
-      background: #e5e7eb;
+      transition: transform .34s ease;
+      background:#dbe4ee;
     }
 
-    .card:hover .card-media img{
+    .card:hover .card-media-link img{
       transform: scale(1.03);
     }
 
@@ -255,62 +416,129 @@
       margin-bottom: 10px;
     }
 
-    .pill{
+    .badge{
       display:inline-flex;
       align-items:center;
       gap:6px;
-      background: #fff7ed;
-      color: #9a3412;
-      border: 1px solid #fed7aa;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      font-size:11px;
+      font-weight:800;
       white-space: nowrap;
     }
 
+    html[data-theme="dark"] .badge{
+      background:#2a1b10;
+      border-color:#7c2d12;
+      color:#fdba74;
+    }
+
     .domain{
-      font-size: 12px;
+      font-size:12px;
       color: var(--muted);
       white-space: nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-title-link{
+      text-decoration:none;
+      color:inherit;
     }
 
     .card-title{
       margin:0 0 10px;
-      font-size: 17px;
-      line-height: 1.35;
-      font-weight: 800;
-      letter-spacing: -0.01em;
-      color: #111827;
+      font-size: 18px;
+      line-height:1.34;
+      font-weight:800;
+      letter-spacing:-.01em;
+      color: var(--text);
     }
 
     .card-desc{
       margin:0;
-      color: #475569;
-      font-size: 14px;
-      line-height: 1.55;
-      display: -webkit-box;
+      font-size:14px;
+      line-height:1.58;
+      color: var(--muted);
+      display:-webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow:hidden;
+      min-height: 66px;
     }
 
-    .card-footer{
+    .card-tags{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
       margin-top: 12px;
+    }
+
+    .mini-chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      color: var(--muted);
+      font-size:11px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .mini-chip:hover{
+      color: var(--text);
+    }
+
+    .card-actions{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      font-size: 13px;
-      color: var(--muted);
+      margin-top: 14px;
     }
 
-    .read-more{
-      font-weight: 700;
-      color: #ea580c;
+    .action-group{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .action-btn{
+      appearance:none;
+      border:1px solid var(--chip-border);
+      background: var(--chip);
+      color: var(--chip-text);
+      border-radius: 12px;
+      padding:10px 12px;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      transition: all .18s ease;
+    }
+
+    .action-btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(15,23,42,.08);
+    }
+
+    .action-btn.saved{
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color:#fff;
+      border-color: transparent;
+    }
+
+    .read-link{
+      text-decoration:none;
+      color:#ea580c;
+      font-size:13px;
+      font-weight:800;
+      white-space:nowrap;
     }
 
     .ad-row{
@@ -318,72 +546,126 @@
     }
 
     .ad-shell{
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      border: 1px solid var(--border);
+      background: var(--ad-bg);
+      border:1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 14px;
-      min-height: 138px;
+      padding:14px;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap:10px;
+      min-height: 138px;
     }
 
     .ad-label{
-      font-size: 11px;
-      font-weight: 800;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.12em;
       text-transform: uppercase;
-      letter-spacing: .12em;
-      color: #64748b;
+      color: var(--muted);
     }
 
     .ad-holder{
-      width: 100%;
-      min-height: 90px;
+      width:100%;
+      min-height:90px;
       display:flex;
       align-items:center;
       justify-content:center;
-      border-radius: 14px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.95));
-      border: 1px dashed #cbd5e1;
+      border-radius:14px;
+      border:1px dashed var(--border);
       overflow:hidden;
       position:relative;
+      background: color-mix(in srgb, var(--card) 92%, transparent);
     }
 
-    .ad-holder::before{
-      content:"Advertisement";
+    .ad-holder::after{
+      content:"Ad";
       position:absolute;
-      inset:auto 10px 10px auto;
+      right:10px;
+      bottom:8px;
       font-size:10px;
-      color:#94a3b8;
-      z-index:1;
+      color: var(--muted);
       pointer-events:none;
     }
 
     .ad-frame{
       border:0;
-      display:block;
       background:transparent;
+      display:block;
       max-width:100%;
     }
 
-    .skeleton-card{
-      background:#fff;
-      border-radius: var(--radius);
-      border:1px solid var(--border);
-      box-shadow: var(--shadow);
-      overflow:hidden;
+    .end-note{
+      text-align:center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 16px 10px 8px;
     }
 
-    .skeleton-shimmer{
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 37%, #eef2f7 63%);
-      background-size: 400% 100%;
-      animation: shimmer 1.3s infinite linear;
+    .sentinel{
+      height: 18px;
+    }
+
+    .back-top{
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 120;
+      appearance:none;
+      border:none;
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      box-shadow: 0 12px 22px rgba(255,107,0,.26);
+      cursor:pointer;
+      opacity:0;
+      visibility:hidden;
+      transform: translateY(10px);
+      transition: all .22s ease;
+    }
+
+    .back-top.show{
+      opacity:1;
+      visibility:visible;
+      transform: translateY(0);
+    }
+
+    .toast{
+      position: fixed;
+      right:16px;
+      bottom:76px;
+      z-index:130;
+      max-width: 320px;
+      background: rgba(15,23,42,.96);
+      color:#fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 16px 34px rgba(15,23,42,.22);
+      font-size:13px;
+      font-weight:800;
+      opacity:0;
+      transform:translateY(10px);
+      pointer-events:none;
+      transition: all .24s ease;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .skeleton-card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
     }
 
     .skeleton-media{
@@ -391,22 +673,25 @@
     }
 
     .skeleton-body{
-      padding: 14px;
+      padding:14px;
     }
 
     .skeleton-line{
       height: 12px;
-      border-radius: 999px;
+      border-radius:999px;
       margin-bottom: 10px;
+      background: linear-gradient(90deg, rgba(148,163,184,.16) 25%, rgba(255,255,255,.24) 37%, rgba(148,163,184,.16) 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.25s linear infinite;
     }
 
-    .skeleton-line.lg{ height: 18px; width: 86%; }
-    .skeleton-line.md{ width: 68%; }
-    .skeleton-line.sm{ width: 48%; }
+    .skeleton-line.lg{ height:18px; width:88%; }
+    .skeleton-line.md{ width:70%; }
+    .skeleton-line.sm{ width:52%; }
 
     @keyframes shimmer{
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
+      0%{ background-position:100% 0; }
+      100%{ background-position:-100% 0; }
     }
 
     @media (max-width: 1200px){
@@ -419,34 +704,69 @@
 
     @media (max-width: 560px){
       .feed{ grid-template-columns: 1fr; }
-      .page{ padding-left: 12px; padding-right: 12px; }
-      .header-inner{ padding-left: 12px; padding-right: 12px; }
-      .card-title{ font-size: 16px; }
-      .hero-chip{ width: 100%; text-align: center; }
+      .page{ padding-left:12px; padding-right:12px; }
+      .header-inner{ padding-left:12px; padding-right:12px; }
+      .search-wrap{ min-width: 100%; }
+      .action-group{ width:100%; }
+      .action-btn{ flex:1; }
+      .card-title{ font-size:17px; }
     }
   </style>
 </head>
 <body>
+  <div class="top-loader" aria-hidden="true">
+    <div id="topLoaderBar" class="top-loader-bar"></div>
+  </div>
 
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
-        <div class="brand-badge">🔥</div>
-        <div class="brand-text">
+        <div class="brand-icon">🔥</div>
+        <div>
           <p class="brand-title">Viral Feed</p>
-          <p class="brand-subtitle">Fast • Clean • Responsive • Sponsored Ready</p>
+          <p class="brand-subtitle">V3 Ultra Premium • Search • Dark Mode • Infinite Scroll • Stable Ads</p>
         </div>
       </div>
-      <div class="hero-chip">Fresh stories, optimized layout, stable ads</div>
+
+      <div class="header-actions">
+        <div class="header-pill" id="statResults">0 stories</div>
+        <div class="header-pill" id="statBookmarks">0 bookmarks</div>
+        <div class="header-pill" id="statCategory">All</div>
+      </div>
     </div>
   </header>
 
   <main class="page">
     <section class="hero">
-      <div class="hero-copy">
-        <h1>Discover trending animal stories</h1>
-        <p>Professional feed layout with secure rendering, stable sponsored slots, fallback handling, and responsive performance.</p>
+      <div>
+        <h1>Discover viral animal stories in a premium feed</h1>
+        <p>Fast search, smart filters, bookmark mode, smooth infinite loading, share actions, and full-width sponsored placements.</p>
       </div>
+    </section>
+
+    <section class="toolbar" aria-label="Feed controls">
+      <div class="toolbar-row">
+        <div class="toolbar-left" style="flex:1 1 720px;">
+          <div class="search-wrap">
+            <input
+              id="searchInput"
+              class="search-input"
+              type="search"
+              placeholder="Search stories, pets, cats, dogs, wildlife..."
+              aria-label="Search articles"
+            />
+            <span class="search-icon">🔎</span>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button id="bookmarkModeBtn" class="control-btn" type="button">☆ Bookmarks only</button>
+          <button id="themeToggleBtn" class="control-btn" type="button">🌙 Dark mode</button>
+          <button id="installBtn" class="control-btn" type="button" hidden>⬇ Install app</button>
+        </div>
+      </div>
+
+      <div id="chips" class="chips" aria-label="Category filters"></div>
     </section>
 
     <div id="status" class="status" aria-live="polite">
@@ -456,11 +776,19 @@
     </div>
 
     <section id="feed" class="feed" aria-label="Article feed"></section>
+    <div id="endNote" class="end-note"></div>
+    <div id="sentinel" class="sentinel" aria-hidden="true"></div>
   </main>
+
+  <button id="backTopBtn" class="back-top" type="button" aria-label="Back to top">↑ Top</button>
+  <div id="toast" class="toast" aria-live="polite"></div>
 
   <script>
     (() => {
       const API_URL = "https://raw.githubusercontent.com/shoaib8133/animal-data/refs/heads/main/articles.json";
+      const BOOKMARK_KEY = "viral-feed-bookmarks-v3";
+      const THEME_KEY = "viral-feed-theme-v3";
+      const BATCH_SIZE = 8;
       const INSERT_AD_AFTER = 4;
 
       const AD_CONFIG = {
@@ -470,21 +798,71 @@
 
       const feed = document.getElementById("feed");
       const statusBox = document.getElementById("status");
+      const chipsBox = document.getElementById("chips");
+      const searchInput = document.getElementById("searchInput");
+      const bookmarkModeBtn = document.getElementById("bookmarkModeBtn");
+      const themeToggleBtn = document.getElementById("themeToggleBtn");
+      const installBtn = document.getElementById("installBtn");
+      const endNote = document.getElementById("endNote");
+      const sentinel = document.getElementById("sentinel");
+      const toast = document.getElementById("toast");
+      const backTopBtn = document.getElementById("backTopBtn");
+      const topLoaderBar = document.getElementById("topLoaderBar");
+      const statResults = document.getElementById("statResults");
+      const statBookmarks = document.getElementById("statBookmarks");
+      const statCategory = document.getElementById("statCategory");
+      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
-      let resizeTimer = null;
-      let masonryObserver = null;
-      let adObserver = null;
+      const state = {
+        allArticles: [],
+        filteredArticles: [],
+        renderedCount: 0,
+        currentCategory: "All",
+        searchQuery: "",
+        bookmarksOnly: false,
+        bookmarks: new Set(JSON.parse(localStorage.getItem(BOOKMARK_KEY) || "[]")),
+        theme: localStorage.getItem(THEME_KEY) || "light",
+        loadingMore: false,
+        masonryObserver: null,
+        adObserver: null,
+        infiniteObserver: null,
+        resizeTimer: null,
+        searchTimer: null,
+        deferredPrompt: null
+      };
 
-      function placeholderSVG(text = "Image unavailable") {
-        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
-            <rect width="1200" height="900" fill="#e2e8f0"/>
-            <rect x="80" y="80" width="1040" height="740" rx="36" fill="#cbd5e1"/>
-            <circle cx="330" cy="330" r="70" fill="#94a3b8"/>
-            <path d="M180 650l180-180 120 120 180-220 260 280H180z" fill="#64748b"/>
-            <text x="50%" y="83%" text-anchor="middle" fill="#0f172a" font-family="Arial, sans-serif" font-size="44" font-weight="700">${text}</text>
-          </svg>
-        `);
+      function trackEvent(name, payload = {}) {
+        if (window.dataLayer && Array.isArray(window.dataLayer)) {
+          window.dataLayer.push({
+            event: name,
+            ...payload
+          });
+        }
+      }
+
+      function startLoader() {
+        topLoaderBar.style.opacity = "1";
+        topLoaderBar.style.width = "18%";
+        requestAnimationFrame(() => {
+          topLoaderBar.style.width = "72%";
+        });
+      }
+
+      function stopLoader() {
+        topLoaderBar.style.width = "100%";
+        setTimeout(() => {
+          topLoaderBar.style.opacity = "0";
+          topLoaderBar.style.width = "0";
+        }, 220);
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 1800);
       }
 
       function setStatus(type, message, showRetry = false) {
@@ -515,8 +893,30 @@
         statusBox.innerHTML = "";
       }
 
-      function clearFeed() {
-        feed.innerHTML = "";
+      function applyTheme(theme) {
+        state.theme = theme;
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem(THEME_KEY, theme);
+        themeToggleBtn.textContent = theme === "dark" ? "☀ Light mode" : "🌙 Dark mode";
+        themeColorMeta.setAttribute("content", theme === "dark" ? "#020617" : "#0f172a");
+      }
+
+      function toggleTheme() {
+        const next = state.theme === "dark" ? "light" : "dark";
+        applyTheme(next);
+        trackEvent("theme_toggle", { theme: next });
+      }
+
+      function placeholderSVG(text = "Image unavailable") {
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+            <rect width="1200" height="900" fill="#dbe4ee"/>
+            <rect x="80" y="80" width="1040" height="740" rx="36" fill="#c7d2de"/>
+            <circle cx="330" cy="330" r="70" fill="#8da0b3"/>
+            <path d="M180 650l180-180 120 120 180-220 260 280H180z" fill="#617487"/>
+            <text x="50%" y="83%" text-anchor="middle" fill="#0f172a" font-family="Arial, sans-serif" font-size="44" font-weight="700">${text}</text>
+          </svg>
+        `);
       }
 
       function safeHttpUrl(value, fallback = "") {
@@ -528,37 +928,52 @@
         }
       }
 
-      function getHostname(value) {
+      function hostnameOf(url) {
         try {
-          return new URL(value).hostname.replace(/^www\./, "");
+          return new URL(url).hostname.replace(/^www\./, "");
         } catch {
           return "external";
         }
+      }
+
+      function inferCategory(article) {
+        const text = `${article.title} ${article.description}`.toLowerCase();
+
+        if (/\bcat|kitten|feline\b/.test(text)) return "Cats";
+        if (/\bdog|puppy|canine\b/.test(text)) return "Dogs";
+        if (/\bfood|nutrition|feeding|diet\b/.test(text)) return "Nutrition";
+        if (/\bcare|groom|training|healthy|insurance|owner|pet\b/.test(text)) return "Pet Care";
+        if (/\brare|extinct|wildlife|fastest|dangerous|weird|beautiful|smartest|superpowers|animal facts\b/.test(text)) return "Wildlife";
+        return "General";
       }
 
       function normalizeArticles(data) {
         const raw = Array.isArray(data) ? data : Array.isArray(data?.articles) ? data.articles : [];
 
         return raw.map((item, index) => {
-          const title = String(item?.title || item?.name || "").trim();
-          const description = String(item?.description || item?.excerpt || "").trim();
+          const title = String(item?.title || item?.name || "").trim() || "No title available";
+          const description = String(item?.description || item?.excerpt || "").trim() || "Open this article to read more.";
           const link = safeHttpUrl(item?.link || item?.url || "", "#");
           const image = safeHttpUrl(item?.image || item?.img || item?.thumbnail || "", "");
-          const domain = link !== "#" ? getHostname(link) : "external";
 
-          return {
+          const article = {
             id: index + 1,
-            title: title || "No title available",
-            description: description || "Open this story to read more details.",
+            title,
+            description,
             link,
             image: image || placeholderSVG("No image"),
-            domain
+            domain: link !== "#" ? hostnameOf(link) : "external"
           };
-        }).filter(article => article.link !== "#");
+
+          article.category = inferCategory(article);
+          return article;
+        }).filter(a => a.link !== "#");
       }
 
-      function showSkeletons(count = 8) {
-        clearFeed();
+      function renderSkeletons(count = 8) {
+        feed.innerHTML = "";
+        endNote.textContent = "";
+
         for (let i = 0; i < count; i++) {
           const item = document.createElement("div");
           item.className = "feed-item";
@@ -568,19 +983,20 @@
           card.className = "skeleton-card";
 
           const media = document.createElement("div");
-          media.className = "skeleton-media skeleton-shimmer";
+          media.className = "skeleton-media";
+          media.style.background = "linear-gradient(90deg, rgba(148,163,184,.16) 25%, rgba(255,255,255,.24) 37%, rgba(148,163,184,.16) 63%)";
+          media.style.backgroundSize = "400% 100%";
+          media.style.animation = "shimmer 1.25s linear infinite";
 
           const body = document.createElement("div");
           body.className = "skeleton-body";
 
           const l1 = document.createElement("div");
-          l1.className = "skeleton-line lg skeleton-shimmer";
-
+          l1.className = "skeleton-line lg";
           const l2 = document.createElement("div");
-          l2.className = "skeleton-line md skeleton-shimmer";
-
+          l2.className = "skeleton-line md";
           const l3 = document.createElement("div");
-          l3.className = "skeleton-line sm skeleton-shimmer";
+          l3.className = "skeleton-line sm";
 
           body.append(l1, l2, l3);
           card.append(media, body);
@@ -589,76 +1005,80 @@
         }
       }
 
-      function createArticleItem(article) {
-        const item = document.createElement("article");
-        item.className = "feed-item";
+      function persistBookmarks() {
+        localStorage.setItem(BOOKMARK_KEY, JSON.stringify([...state.bookmarks]));
+        statBookmarks.textContent = `${state.bookmarks.size} bookmarks`;
+      }
 
-        const card = document.createElement("a");
-        card.className = "card";
-        card.href = article.link;
-        card.target = "_blank";
-        card.rel = "noopener noreferrer";
-        card.setAttribute("aria-label", article.title);
+      function updateStats() {
+        statResults.textContent = `${state.filteredArticles.length} stories`;
+        statBookmarks.textContent = `${state.bookmarks.size} bookmarks`;
+        statCategory.textContent = state.currentCategory;
+      }
 
-        const media = document.createElement("div");
-        media.className = "card-media";
+      function getCategories() {
+        const dynamic = [...new Set(state.allArticles.map(a => a.category))].sort((a, b) => a.localeCompare(b));
+        return ["All", ...dynamic];
+      }
 
-        const img = document.createElement("img");
-        img.src = article.image;
-        img.alt = article.title;
-        img.loading = "lazy";
-        img.decoding = "async";
-        img.referrerPolicy = "no-referrer";
-        img.addEventListener("load", scheduleMasonry);
-        img.addEventListener("error", () => {
-          img.src = placeholderSVG("Image unavailable");
-          scheduleMasonry();
+      function renderCategoryChips() {
+        chipsBox.innerHTML = "";
+        getCategories().forEach(category => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "chip" + (state.currentCategory === category ? " active" : "");
+          btn.textContent = category;
+          btn.addEventListener("click", () => {
+            if (state.currentCategory === category) return;
+            state.currentCategory = category;
+            trackEvent("category_filter", { category });
+            applyFiltersAndRender();
+          });
+          chipsBox.appendChild(btn);
         });
+      }
 
-        media.appendChild(img);
+      function computeFilteredArticles() {
+        let list = [...state.allArticles];
 
-        const body = document.createElement("div");
-        body.className = "card-body";
+        if (state.currentCategory !== "All") {
+          list = list.filter(item => item.category === state.currentCategory);
+        }
 
-        const meta = document.createElement("div");
-        meta.className = "card-meta";
+        if (state.bookmarksOnly) {
+          list = list.filter(item => state.bookmarks.has(item.id));
+        }
 
-        const pill = document.createElement("span");
-        pill.className = "pill";
-        pill.textContent = "Trending";
+        const q = state.searchQuery.trim().toLowerCase();
+        if (q) {
+          list = list.filter(item => {
+            const haystack = `${item.title} ${item.description} ${item.category} ${item.domain}`.toLowerCase();
+            return haystack.includes(q);
+          });
+        }
 
-        const domain = document.createElement("span");
-        domain.className = "domain";
-        domain.textContent = article.domain;
+        return list;
+      }
 
-        meta.append(pill, domain);
+      function applyFiltersAndRender() {
+        startLoader();
 
-        const title = document.createElement("h2");
-        title.className = "card-title";
-        title.textContent = article.title;
+        state.filteredArticles = computeFilteredArticles();
+        state.renderedCount = 0;
+        feed.innerHTML = "";
+        endNote.textContent = "";
 
-        const desc = document.createElement("p");
-        desc.className = "card-desc";
-        desc.textContent = article.description;
+        renderCategoryChips();
+        updateStats();
 
-        const footer = document.createElement("div");
-        footer.className = "card-footer";
+        if (!state.filteredArticles.length) {
+          setStatus("empty", "Koi result nahi mila. Search ya filter change karke dekho.");
+          stopLoader();
+          return;
+        }
 
-        const left = document.createElement("span");
-        left.textContent = "Open article";
-
-        const right = document.createElement("span");
-        right.className = "read-more";
-        right.textContent = "Read more →";
-
-        footer.append(left, right);
-
-        body.append(meta, title, desc, footer);
-        card.append(media, body);
-        item.appendChild(card);
-
-        observeForMasonry(item);
-        return item;
+        hideStatus();
+        renderNextBatch(true);
       }
 
       function getAdSize() {
@@ -668,9 +1088,9 @@
         return { width: 728, height: 90 };
       }
 
-      function getAdSizeKey() {
-        const size = getAdSize();
-        return `${size.width}x${size.height}`;
+      function adSizeKey() {
+        const { width, height } = getAdSize();
+        return `${width}x${height}`;
       }
 
       function buildAdSrcdoc(size) {
@@ -686,10 +1106,10 @@
       width:100%;
       height:100%;
       overflow:hidden;
-      background:transparent;
       display:flex;
       align-items:center;
       justify-content:center;
+      background:transparent;
     }
   </style>
 </head>
@@ -708,33 +1128,30 @@
 </html>`;
       }
 
-      function loadAdInto(holder) {
+      function loadAd(holder) {
         const size = getAdSize();
         const key = `${size.width}x${size.height}`;
 
-        if (holder.dataset.loaded === "true" && holder.dataset.size === key) {
-          return;
-        }
+        if (holder.dataset.loaded === "true" && holder.dataset.size === key) return;
 
+        holder.innerHTML = "";
         holder.dataset.loaded = "true";
         holder.dataset.size = key;
-        holder.innerHTML = "";
+        holder.style.minHeight = size.height + "px";
 
         const frame = document.createElement("iframe");
         frame.className = "ad-frame";
-        frame.title = "Sponsored Advertisement";
         frame.width = size.width;
         frame.height = size.height;
         frame.loading = "lazy";
+        frame.title = "Sponsored Advertisement";
         frame.setAttribute("scrolling", "no");
         frame.setAttribute("frameborder", "0");
         frame.referrerPolicy = "no-referrer";
         frame.sandbox = "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation";
         frame.srcdoc = buildAdSrcdoc(size);
 
-        holder.style.minHeight = size.height + "px";
         holder.appendChild(frame);
-
         scheduleMasonry();
       }
 
@@ -760,18 +1177,178 @@
 
         observeForMasonry(item);
 
-        if (adObserver) {
-          adObserver.observe(holder);
+        if (state.adObserver) {
+          state.adObserver.observe(holder);
         } else {
-          loadAdInto(holder);
+          loadAd(holder);
         }
 
         return item;
       }
 
-      function resizeGridItem(item) {
-        if (!item || !feed) return;
+      function shareArticle(article) {
+        const shareData = {
+          title: article.title,
+          text: article.description,
+          url: article.link
+        };
 
+        trackEvent("article_share", { id: article.id, category: article.category });
+
+        if (navigator.share) {
+          navigator.share(shareData).catch(() => {});
+          return;
+        }
+
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(article.link)
+            .then(() => showToast("Link copied"))
+            .catch(() => showToast("Share unavailable"));
+          return;
+        }
+
+        showToast("Share unavailable");
+      }
+
+      function toggleBookmark(id, button) {
+        if (state.bookmarks.has(id)) {
+          state.bookmarks.delete(id);
+          button.classList.remove("saved");
+          button.textContent = "☆ Save";
+          showToast("Bookmark removed");
+          trackEvent("bookmark_remove", { id });
+        } else {
+          state.bookmarks.add(id);
+          button.classList.add("saved");
+          button.textContent = "★ Saved";
+          showToast("Bookmarked");
+          trackEvent("bookmark_add", { id });
+        }
+
+        persistBookmarks();
+
+        if (state.bookmarksOnly) {
+          applyFiltersAndRender();
+        }
+      }
+
+      function createArticleCard(article) {
+        const item = document.createElement("article");
+        item.className = "feed-item";
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const mediaLink = document.createElement("a");
+        mediaLink.className = "card-media-link";
+        mediaLink.href = article.link;
+        mediaLink.target = "_blank";
+        mediaLink.rel = "noopener noreferrer";
+        mediaLink.setAttribute("aria-label", article.title);
+
+        const img = document.createElement("img");
+        img.src = article.image;
+        img.alt = article.title;
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.referrerPolicy = "no-referrer";
+        img.addEventListener("load", scheduleMasonry);
+        img.addEventListener("error", () => {
+          img.src = placeholderSVG("Image unavailable");
+          scheduleMasonry();
+        });
+
+        mediaLink.appendChild(img);
+
+        const body = document.createElement("div");
+        body.className = "card-body";
+
+        const meta = document.createElement("div");
+        meta.className = "card-meta";
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = "Trending";
+
+        const domain = document.createElement("span");
+        domain.className = "domain";
+        domain.textContent = article.domain;
+
+        meta.append(badge, domain);
+
+        const titleLink = document.createElement("a");
+        titleLink.className = "card-title-link";
+        titleLink.href = article.link;
+        titleLink.target = "_blank";
+        titleLink.rel = "noopener noreferrer";
+
+        const title = document.createElement("h2");
+        title.className = "card-title";
+        title.textContent = article.title;
+
+        titleLink.appendChild(title);
+
+        const desc = document.createElement("p");
+        desc.className = "card-desc";
+        desc.textContent = article.description;
+
+        const tags = document.createElement("div");
+        tags.className = "card-tags";
+
+        const catChip = document.createElement("button");
+        catChip.type = "button";
+        catChip.className = "mini-chip";
+        catChip.textContent = article.category;
+        catChip.addEventListener("click", () => {
+          state.currentCategory = article.category;
+          applyFiltersAndRender();
+        });
+
+        const domainChip = document.createElement("span");
+        domainChip.className = "mini-chip";
+        domainChip.textContent = article.domain;
+
+        tags.append(catChip, domainChip);
+
+        const actions = document.createElement("div");
+        actions.className = "card-actions";
+
+        const actionGroup = document.createElement("div");
+        actionGroup.className = "action-group";
+
+        const shareBtn = document.createElement("button");
+        shareBtn.type = "button";
+        shareBtn.className = "action-btn";
+        shareBtn.textContent = "↗ Share";
+        shareBtn.addEventListener("click", () => shareArticle(article));
+
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "action-btn" + (state.bookmarks.has(article.id) ? " saved" : "");
+        saveBtn.textContent = state.bookmarks.has(article.id) ? "★ Saved" : "☆ Save";
+        saveBtn.addEventListener("click", () => toggleBookmark(article.id, saveBtn));
+
+        actionGroup.append(shareBtn, saveBtn);
+
+        const readLink = document.createElement("a");
+        readLink.className = "read-link";
+        readLink.href = article.link;
+        readLink.target = "_blank";
+        readLink.rel = "noopener noreferrer";
+        readLink.textContent = "Read more →";
+
+        actions.append(actionGroup, readLink);
+
+        body.append(meta, titleLink, desc, tags, actions);
+        card.append(mediaLink, body);
+        item.appendChild(card);
+
+        observeForMasonry(item);
+        return item;
+      }
+
+      function resizeGridItem(item) {
+        if (!item) return;
         const rowUnit = parseInt(getComputedStyle(feed).getPropertyValue("--row-unit"), 10) || 8;
         const gap = parseInt(getComputedStyle(feed).gap, 10) || 16;
         const content = item.firstElementChild || item;
@@ -781,52 +1358,66 @@
       }
 
       function resizeAllGridItems() {
-        const items = feed.querySelectorAll(".feed-item");
-        items.forEach(resizeGridItem);
+        feed.querySelectorAll(".feed-item").forEach(resizeGridItem);
       }
 
       function scheduleMasonry() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          resizeAllGridItems();
-        }, 40);
+        clearTimeout(state.resizeTimer);
+        state.resizeTimer = setTimeout(resizeAllGridItems, 40);
       }
 
       function observeForMasonry(item) {
-        if (!masonryObserver && "ResizeObserver" in window) {
-          masonryObserver = new ResizeObserver((entries) => {
+        if (!state.masonryObserver && "ResizeObserver" in window) {
+          state.masonryObserver = new ResizeObserver(entries => {
             for (const entry of entries) {
-              const target = entry.target;
-              if (target.classList.contains("feed-item")) {
-                resizeGridItem(target);
+              if (entry.target.classList.contains("feed-item")) {
+                resizeGridItem(entry.target);
               }
             }
           });
         }
-
-        if (masonryObserver) {
-          masonryObserver.observe(item);
+        if (state.masonryObserver) {
+          state.masonryObserver.observe(item);
         }
       }
 
-      function buildFeed(articles) {
-        clearFeed();
+      function renderNextBatch(initial = false) {
+        if (state.loadingMore) return;
+        if (state.renderedCount >= state.filteredArticles.length) {
+          endNote.textContent = "You've reached the end.";
+          stopLoader();
+          return;
+        }
 
+        state.loadingMore = true;
+        startLoader();
+
+        const nextSlice = state.filteredArticles.slice(state.renderedCount, state.renderedCount + BATCH_SIZE);
         const fragment = document.createDocumentFragment();
 
-        articles.forEach((article, index) => {
-          fragment.appendChild(createArticleItem(article));
+        nextSlice.forEach((article, i) => {
+          const visibleIndex = state.renderedCount + i + 1;
+          fragment.appendChild(createArticleCard(article));
 
-          if ((index + 1) % INSERT_AD_AFTER === 0) {
-            fragment.appendChild(createAdItem((index + 1) / INSERT_AD_AFTER));
+          if (visibleIndex % INSERT_AD_AFTER === 0) {
+            fragment.appendChild(createAdItem(visibleIndex / INSERT_AD_AFTER));
           }
         });
 
         feed.appendChild(fragment);
+        state.renderedCount += nextSlice.length;
 
         requestAnimationFrame(() => {
           resizeAllGridItems();
-          hideStatus();
+          state.loadingMore = false;
+          stopLoader();
+          if (initial) hideStatus();
+
+          if (state.renderedCount >= state.filteredArticles.length) {
+            endNote.textContent = "You've reached the end.";
+          } else {
+            endNote.textContent = "";
+          }
         });
       }
 
@@ -851,61 +1442,139 @@
         }
       }
 
-      async function init() {
-        setStatus("", "Loading articles...");
-        showSkeletons(8);
+      function setupInfiniteScroll() {
+        if (state.infiniteObserver) state.infiniteObserver.disconnect();
 
-        try {
-          const data = await fetchArticles();
-          const articles = normalizeArticles(data);
+        state.infiniteObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && !state.loadingMore) {
+              renderNextBatch(false);
+            }
+          });
+        }, { rootMargin: "500px 0px" });
 
-          if (!articles.length) {
-            clearFeed();
-            setStatus("empty", "No articles found right now.");
-            return;
-          }
-
-          buildFeed(articles);
-        } catch (error) {
-          console.error("Feed load error:", error);
-          clearFeed();
-          setStatus("error", "Articles load nahi huye. Network/API issue ho sakta hai.", true);
-        }
+        state.infiniteObserver.observe(sentinel);
       }
 
       function setupAdObserver() {
         if (!("IntersectionObserver" in window)) return;
 
-        adObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
+        state.adObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
             if (entry.isIntersecting) {
-              loadAdInto(entry.target);
-              adObserver.unobserve(entry.target);
+              loadAd(entry.target);
+              state.adObserver.unobserve(entry.target);
             }
           });
-        }, {
-          rootMargin: "300px 0px"
-        });
+        }, { rootMargin: "300px 0px" });
       }
 
-      function handleResponsiveRefresh() {
-        const currentKey = getAdSizeKey();
-        document.querySelectorAll(".ad-holder[data-loaded='true']").forEach((holder) => {
-          if (holder.dataset.size !== currentKey) {
+      function refreshVisibleAdsOnResize() {
+        const current = adSizeKey();
+        document.querySelectorAll(".ad-holder[data-loaded='true']").forEach(holder => {
+          if (holder.dataset.size !== current) {
             holder.dataset.loaded = "false";
-            loadAdInto(holder);
+            loadAd(holder);
           }
         });
         scheduleMasonry();
       }
 
-      setupAdObserver();
+      function handleSearchInput() {
+        clearTimeout(state.searchTimer);
+        state.searchTimer = setTimeout(() => {
+          state.searchQuery = searchInput.value.trim();
+          trackEvent("search", { q: state.searchQuery });
+          applyFiltersAndRender();
+        }, 220);
+      }
+
+      function toggleBookmarksOnly() {
+        state.bookmarksOnly = !state.bookmarksOnly;
+        bookmarkModeBtn.classList.toggle("active", state.bookmarksOnly);
+        bookmarkModeBtn.textContent = state.bookmarksOnly ? "★ Bookmarks only" : "☆ Bookmarks only";
+        trackEvent("bookmark_mode", { enabled: state.bookmarksOnly });
+        applyFiltersAndRender();
+      }
+
+      function handleScrollUI() {
+        if (window.scrollY > 480) {
+          backTopBtn.classList.add("show");
+        } else {
+          backTopBtn.classList.remove("show");
+        }
+      }
+
+      function promptInstall() {
+        if (!state.deferredPrompt) return;
+        state.deferredPrompt.prompt();
+        state.deferredPrompt.userChoice.finally(() => {
+          state.deferredPrompt = null;
+          installBtn.hidden = true;
+        });
+      }
+
+      async function init() {
+        startLoader();
+        setStatus("", "Loading articles...");
+        renderSkeletons(8);
+        applyTheme(state.theme);
+
+        try {
+          const data = await fetchArticles();
+          state.allArticles = normalizeArticles(data);
+          renderCategoryChips();
+          state.filteredArticles = computeFilteredArticles();
+          updateStats();
+
+          if (!state.allArticles.length) {
+            feed.innerHTML = "";
+            setStatus("empty", "No articles found right now.");
+            stopLoader();
+            return;
+          }
+
+          applyFiltersAndRender();
+          setupInfiniteScroll();
+          trackEvent("feed_loaded", { count: state.allArticles.length });
+        } catch (error) {
+          console.error("Feed load error:", error);
+          feed.innerHTML = "";
+          setStatus("error", "Articles load nahi huye. Network ya API issue ho sakta hai.", true);
+          stopLoader();
+        }
+      }
+
+      // events
+      searchInput.addEventListener("input", handleSearchInput);
+      bookmarkModeBtn.addEventListener("click", toggleBookmarksOnly);
+      themeToggleBtn.addEventListener("click", toggleTheme);
+      installBtn.addEventListener("click", promptInstall);
+      backTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+      window.addEventListener("scroll", handleScrollUI, { passive: true });
       window.addEventListener("resize", () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(handleResponsiveRefresh, 180);
+        clearTimeout(state.resizeTimer);
+        state.resizeTimer = setTimeout(refreshVisibleAdsOnResize, 180);
       }, { passive: true });
 
       window.addEventListener("load", scheduleMasonry);
+
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        state.deferredPrompt = event;
+        installBtn.hidden = false;
+      });
+
+      window.addEventListener("appinstalled", () => {
+        showToast("App installed");
+        installBtn.hidden = true;
+        trackEvent("app_installed");
+      });
+
+      setupAdObserver();
+      persistBookmarks();
+      applyTheme(state.theme);
       init();
     })();
   </script>
