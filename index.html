@@ -1,104 +1,913 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viral Feed</title>
+  <meta name="description" content="A fast, responsive viral feed with professional article cards and properly placed sponsored ads." />
+
+  <style>
+    :root{
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #0f172a;
+      --accent: #ff6b00;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-hover: 0 14px 34px rgba(15, 23, 42, 0.14);
+      --radius: 18px;
+      --gap: 16px;
+      --row-unit: 8px;
+      --max-width: 1440px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body{
+      margin:0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(255,107,0,0.08), transparent 22%),
+        linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .site-header{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.92);
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .header-inner{
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 0;
+    }
+
+    .brand-badge{
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      background: linear-gradient(135deg, #ff6b00, #ff9f43);
+      font-size: 20px;
+      box-shadow: 0 8px 20px rgba(255,107,0,0.28);
+      flex-shrink: 0;
+    }
+
+    .brand-text{
+      min-width: 0;
+    }
+
+    .brand-title{
+      margin:0;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle{
+      margin: 3px 0 0;
+      color: rgba(255,255,255,0.72);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page{
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+
+    .hero{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .hero-copy h1{
+      margin:0;
+      font-size: clamp(24px, 3vw, 40px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--primary);
+    }
+
+    .hero-copy p{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 760px;
+    }
+
+    .hero-chip{
+      background: rgba(255,255,255,0.92);
+      border:1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status{
+      margin-bottom: 18px;
+      border-radius: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.82);
+      box-shadow: var(--shadow);
+      color: var(--text);
+    }
+
+    .status.hidden{
+      display:none;
+    }
+
+    .status.error{
+      border-color: #fecaca;
+      background: #fff1f2;
+      color: #991b1b;
+    }
+
+    .status.empty{
+      border-color: #e2e8f0;
+      background: #ffffff;
+      color: #334155;
+    }
+
+    .status .status-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .retry-btn{
+      appearance:none;
+      border:none;
+      background: var(--primary);
+      color:#fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor:pointer;
+      transition: transform .18s ease, opacity .18s ease;
+    }
+
+    .retry-btn:hover{ transform: translateY(-1px); opacity: .95; }
+
+    .feed{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--gap);
+      grid-auto-rows: var(--row-unit);
+      align-items: start;
+    }
+
+    .feed-item{
+      min-width: 0;
+    }
+
+    .card{
+      display:flex;
+      flex-direction:column;
+      background: var(--card);
+      border: 1px solid rgba(226,232,240,0.9);
+      border-radius: var(--radius);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      text-decoration:none;
+      color: inherit;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      height: fit-content;
+      will-change: transform;
+    }
+
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: #dbe4f0;
+    }
+
+    .card:focus-visible{
+      outline: 3px solid rgba(255,107,0,0.35);
+      outline-offset: 3px;
+    }
+
+    .card-media{
+      position:relative;
+      background: #e5e7eb;
+      overflow:hidden;
+      aspect-ratio: 4 / 3;
+    }
+
+    .card-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transition: transform .35s ease;
+      background: #e5e7eb;
+    }
+
+    .card:hover .card-media img{
+      transform: scale(1.03);
+    }
+
+    .card-body{
+      padding: 14px;
+    }
+
+    .card-meta{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .domain{
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .card-title{
+      margin:0 0 10px;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #111827;
+    }
+
+    .card-desc{
+      margin:0;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    .card-footer{
+      margin-top: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .read-more{
+      font-weight: 700;
+      color: #ea580c;
+    }
+
+    .ad-row{
+      grid-column: 1 / -1;
+    }
+
+    .ad-shell{
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-height: 138px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .ad-label{
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #64748b;
+    }
+
+    .ad-holder{
+      width: 100%;
+      min-height: 90px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.95));
+      border: 1px dashed #cbd5e1;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .ad-holder::before{
+      content:"Advertisement";
+      position:absolute;
+      inset:auto 10px 10px auto;
+      font-size:10px;
+      color:#94a3b8;
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .ad-frame{
+      border:0;
+      display:block;
+      background:transparent;
+      max-width:100%;
+    }
+
+    .skeleton-card{
+      background:#fff;
+      border-radius: var(--radius);
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .skeleton-shimmer{
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 37%, #eef2f7 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.3s infinite linear;
+    }
+
+    .skeleton-media{
+      aspect-ratio: 4 / 3;
+    }
+
+    .skeleton-body{
+      padding: 14px;
+    }
+
+    .skeleton-line{
+      height: 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .skeleton-line.lg{ height: 18px; width: 86%; }
+    .skeleton-line.md{ width: 68%; }
+    .skeleton-line.sm{ width: 48%; }
+
+    @keyframes shimmer{
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    @media (max-width: 1200px){
+      .feed{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 860px){
+      .feed{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px){
+      .feed{ grid-template-columns: 1fr; }
+      .page{ padding-left: 12px; padding-right: 12px; }
+      .header-inner{ padding-left: 12px; padding-right: 12px; }
+      .card-title{ font-size: 16px; }
+      .hero-chip{ width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-badge">🔥</div>
+        <div class="brand-text">
+          <p class="brand-title">Viral Feed</p>
+          <p class="brand-subtitle">Fast • Clean • Responsive • Sponsored Ready</p>
+        </div>
+      </div>
+      <div class="hero-chip">Fresh stories, optimized layout, stable ads</div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Discover trending animal stories</h1>
+        <p>Professional feed layout with secure rendering, stable sponsored slots, fallback handling, and responsive performance.</p>
+      </div>
+    </section>
+
+    <div id="status" class="status" aria-live="polite">
+      <div class="status-row">
+        <span>Loading articles...</span>
+      </div>
+    </div>
+
+    <section id="feed" class="feed" aria-label="Article feed"></section>
+  </main>
+
+  <script>
+    (() => {
+      const API_URL = "https://raw.githubusercontent.com/shoaib8133/animal-data/refs/heads/main/articles.json";
+      const INSERT_AD_AFTER = 4;
+
+      const AD_CONFIG = {
+        key: "ebca7f88ae00e7b54d4f3d0b6bdca4b7",
+        scriptUrl: "https://emotionalhabitat.com/ebca7f88ae00e7b54d4f3d0b6bdca4b7/invoke.js"
+      };
+
+      const feed = document.getElementById("feed");
+      const statusBox = document.getElementById("status");
+
+      let resizeTimer = null;
+      let masonryObserver = null;
+      let adObserver = null;
+
+      function placeholderSVG(text = "Image unavailable") {
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+            <rect width="1200" height="900" fill="#e2e8f0"/>
+            <rect x="80" y="80" width="1040" height="740" rx="36" fill="#cbd5e1"/>
+            <circle cx="330" cy="330" r="70" fill="#94a3b8"/>
+            <path d="M180 650l180-180 120 120 180-220 260 280H180z" fill="#64748b"/>
+            <text x="50%" y="83%" text-anchor="middle" fill="#0f172a" font-family="Arial, sans-serif" font-size="44" font-weight="700">${text}</text>
+          </svg>
+        `);
+      }
+
+      function setStatus(type, message, showRetry = false) {
+        statusBox.className = "status" + (type ? " " + type : "");
+        statusBox.innerHTML = "";
+
+        const row = document.createElement("div");
+        row.className = "status-row";
+
+        const text = document.createElement("span");
+        text.textContent = message;
+        row.appendChild(text);
+
+        if (showRetry) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "retry-btn";
+          btn.textContent = "Retry";
+          btn.addEventListener("click", init);
+          row.appendChild(btn);
+        }
+
+        statusBox.appendChild(row);
+      }
+
+      function hideStatus() {
+        statusBox.className = "status hidden";
+        statusBox.innerHTML = "";
+      }
+
+      function clearFeed() {
+        feed.innerHTML = "";
+      }
+
+      function safeHttpUrl(value, fallback = "") {
+        try {
+          const url = new URL(value, window.location.href);
+          return /^https?:$/i.test(url.protocol) ? url.href : fallback;
+        } catch {
+          return fallback;
+        }
+      }
+
+      function getHostname(value) {
+        try {
+          return new URL(value).hostname.replace(/^www\./, "");
+        } catch {
+          return "external";
+        }
+      }
+
+      function normalizeArticles(data) {
+        const raw = Array.isArray(data) ? data : Array.isArray(data?.articles) ? data.articles : [];
+
+        return raw.map((item, index) => {
+          const title = String(item?.title || item?.name || "").trim();
+          const description = String(item?.description || item?.excerpt || "").trim();
+          const link = safeHttpUrl(item?.link || item?.url || "", "#");
+          const image = safeHttpUrl(item?.image || item?.img || item?.thumbnail || "", "");
+          const domain = link !== "#" ? getHostname(link) : "external";
+
+          return {
+            id: index + 1,
+            title: title || "No title available",
+            description: description || "Open this story to read more details.",
+            link,
+            image: image || placeholderSVG("No image"),
+            domain
+          };
+        }).filter(article => article.link !== "#");
+      }
+
+      function showSkeletons(count = 8) {
+        clearFeed();
+        for (let i = 0; i < count; i++) {
+          const item = document.createElement("div");
+          item.className = "feed-item";
+          item.style.gridRowEnd = "span 36";
+
+          const card = document.createElement("div");
+          card.className = "skeleton-card";
+
+          const media = document.createElement("div");
+          media.className = "skeleton-media skeleton-shimmer";
+
+          const body = document.createElement("div");
+          body.className = "skeleton-body";
+
+          const l1 = document.createElement("div");
+          l1.className = "skeleton-line lg skeleton-shimmer";
+
+          const l2 = document.createElement("div");
+          l2.className = "skeleton-line md skeleton-shimmer";
+
+          const l3 = document.createElement("div");
+          l3.className = "skeleton-line sm skeleton-shimmer";
+
+          body.append(l1, l2, l3);
+          card.append(media, body);
+          item.appendChild(card);
+          feed.appendChild(item);
+        }
+      }
+
+      function createArticleItem(article) {
+        const item = document.createElement("article");
+        item.className = "feed-item";
+
+        const card = document.createElement("a");
+        card.className = "card";
+        card.href = article.link;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+        card.setAttribute("aria-label", article.title);
+
+        const media = document.createElement("div");
+        media.className = "card-media";
+
+        const img = document.createElement("img");
+        img.src = article.image;
+        img.alt = article.title;
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.referrerPolicy = "no-referrer";
+        img.addEventListener("load", scheduleMasonry);
+        img.addEventListener("error", () => {
+          img.src = placeholderSVG("Image unavailable");
+          scheduleMasonry();
+        });
+
+        media.appendChild(img);
+
+        const body = document.createElement("div");
+        body.className = "card-body";
+
+        const meta = document.createElement("div");
+        meta.className = "card-meta";
+
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = "Trending";
+
+        const domain = document.createElement("span");
+        domain.className = "domain";
+        domain.textContent = article.domain;
+
+        meta.append(pill, domain);
+
+        const title = document.createElement("h2");
+        title.className = "card-title";
+        title.textContent = article.title;
+
+        const desc = document.createElement("p");
+        desc.className = "card-desc";
+        desc.textContent = article.description;
+
+        const footer = document.createElement("div");
+        footer.className = "card-footer";
+
+        const left = document.createElement("span");
+        left.textContent = "Open article";
+
+        const right = document.createElement("span");
+        right.className = "read-more";
+        right.textContent = "Read more →";
+
+        footer.append(left, right);
+
+        body.append(meta, title, desc, footer);
+        card.append(media, body);
+        item.appendChild(card);
+
+        observeForMasonry(item);
+        return item;
+      }
+
+      function getAdSize() {
+        const w = window.innerWidth;
+        if (w <= 480) return { width: 320, height: 50 };
+        if (w <= 900) return { width: 468, height: 60 };
+        return { width: 728, height: 90 };
+      }
+
+      function getAdSizeKey() {
+        const size = getAdSize();
+        return `${size.width}x${size.height}`;
+      }
+
+      function buildAdSrcdoc(size) {
+        return `
+<!doctype html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Cute Animals Daily</title>
-
-<style>
-
-body{
-margin:0;
-font-family:Arial;
-background:#f2f2f2;
-}
-
-.grid{
-column-count:4;
-column-gap:15px;
-padding:15px;
-}
-
-.card{
-background:#fff;
-margin-bottom:15px;
-border-radius:10px;
-overflow:hidden;
-break-inside:avoid;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
-cursor:pointer;
-}
-
-.card img{
-width:100%;
-}
-
-.card h3{
-padding:10px;
-font-size:16px;
-}
-
-.card p{
-padding:0 10px 10px;
-font-size:14px;
-color:#555;
-}
-
-</style>
+  <meta charset="utf-8">
+  <style>
+    html,body{
+      margin:0;
+      padding:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:transparent;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+  </style>
 </head>
-
 <body>
-<!-- TOP ADSTERAA AD -->
-<div style="text-align:center; margin:20px 0;">
   <script>
-    atOptions = {
-      'key' : 'ebca7f88ae00e7b54d4f3d0b6bdca4b7',
-      'format' : 'iframe',
-      'height' : 90,
-      'width' : 728,
-      'params' : {}
+    var atOptions = {
+      key: ${JSON.stringify(AD_CONFIG.key)},
+      format: 'iframe',
+      height: ${size.height},
+      width: ${size.width},
+      params: {}
     };
+  <\/script>
+  <script src=${JSON.stringify(AD_CONFIG.scriptUrl)} async><\/script>
+</body>
+</html>`;
+      }
+
+      function loadAdInto(holder) {
+        const size = getAdSize();
+        const key = `${size.width}x${size.height}`;
+
+        if (holder.dataset.loaded === "true" && holder.dataset.size === key) {
+          return;
+        }
+
+        holder.dataset.loaded = "true";
+        holder.dataset.size = key;
+        holder.innerHTML = "";
+
+        const frame = document.createElement("iframe");
+        frame.className = "ad-frame";
+        frame.title = "Sponsored Advertisement";
+        frame.width = size.width;
+        frame.height = size.height;
+        frame.loading = "lazy";
+        frame.setAttribute("scrolling", "no");
+        frame.setAttribute("frameborder", "0");
+        frame.referrerPolicy = "no-referrer";
+        frame.sandbox = "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation";
+        frame.srcdoc = buildAdSrcdoc(size);
+
+        holder.style.minHeight = size.height + "px";
+        holder.appendChild(frame);
+
+        scheduleMasonry();
+      }
+
+      function createAdItem(slotNumber) {
+        const item = document.createElement("section");
+        item.className = "feed-item ad-row";
+        item.setAttribute("aria-label", `Sponsored slot ${slotNumber}`);
+
+        const shell = document.createElement("div");
+        shell.className = "ad-shell";
+
+        const label = document.createElement("div");
+        label.className = "ad-label";
+        label.textContent = "Sponsored";
+
+        const holder = document.createElement("div");
+        holder.className = "ad-holder";
+        holder.dataset.loaded = "false";
+        holder.dataset.size = "";
+
+        shell.append(label, holder);
+        item.appendChild(shell);
+
+        observeForMasonry(item);
+
+        if (adObserver) {
+          adObserver.observe(holder);
+        } else {
+          loadAdInto(holder);
+        }
+
+        return item;
+      }
+
+      function resizeGridItem(item) {
+        if (!item || !feed) return;
+
+        const rowUnit = parseInt(getComputedStyle(feed).getPropertyValue("--row-unit"), 10) || 8;
+        const gap = parseInt(getComputedStyle(feed).gap, 10) || 16;
+        const content = item.firstElementChild || item;
+        const height = content.getBoundingClientRect().height;
+        const span = Math.max(1, Math.ceil((height + gap) / (rowUnit + gap)));
+        item.style.gridRowEnd = `span ${span}`;
+      }
+
+      function resizeAllGridItems() {
+        const items = feed.querySelectorAll(".feed-item");
+        items.forEach(resizeGridItem);
+      }
+
+      function scheduleMasonry() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          resizeAllGridItems();
+        }, 40);
+      }
+
+      function observeForMasonry(item) {
+        if (!masonryObserver && "ResizeObserver" in window) {
+          masonryObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+              const target = entry.target;
+              if (target.classList.contains("feed-item")) {
+                resizeGridItem(target);
+              }
+            }
+          });
+        }
+
+        if (masonryObserver) {
+          masonryObserver.observe(item);
+        }
+      }
+
+      function buildFeed(articles) {
+        clearFeed();
+
+        const fragment = document.createDocumentFragment();
+
+        articles.forEach((article, index) => {
+          fragment.appendChild(createArticleItem(article));
+
+          if ((index + 1) % INSERT_AD_AFTER === 0) {
+            fragment.appendChild(createAdItem((index + 1) / INSERT_AD_AFTER));
+          }
+        });
+
+        feed.appendChild(fragment);
+
+        requestAnimationFrame(() => {
+          resizeAllGridItems();
+          hideStatus();
+        });
+      }
+
+      async function fetchArticles() {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "GET",
+            signal: controller.signal,
+            cache: "no-store"
+          });
+
+          if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+          }
+
+          return await response.json();
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
+      async function init() {
+        setStatus("", "Loading articles...");
+        showSkeletons(8);
+
+        try {
+          const data = await fetchArticles();
+          const articles = normalizeArticles(data);
+
+          if (!articles.length) {
+            clearFeed();
+            setStatus("empty", "No articles found right now.");
+            return;
+          }
+
+          buildFeed(articles);
+        } catch (error) {
+          console.error("Feed load error:", error);
+          clearFeed();
+          setStatus("error", "Articles load nahi huye. Network/API issue ho sakta hai.", true);
+        }
+      }
+
+      function setupAdObserver() {
+        if (!("IntersectionObserver" in window)) return;
+
+        adObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              loadAdInto(entry.target);
+              adObserver.unobserve(entry.target);
+            }
+          });
+        }, {
+          rootMargin: "300px 0px"
+        });
+      }
+
+      function handleResponsiveRefresh() {
+        const currentKey = getAdSizeKey();
+        document.querySelectorAll(".ad-holder[data-loaded='true']").forEach((holder) => {
+          if (holder.dataset.size !== currentKey) {
+            holder.dataset.loaded = "false";
+            loadAdInto(holder);
+          }
+        });
+        scheduleMasonry();
+      }
+
+      setupAdObserver();
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(handleResponsiveRefresh, 180);
+      }, { passive: true });
+
+      window.addEventListener("load", scheduleMasonry);
+      init();
+    })();
   </script>
-  <script src="https://emotionalhabitat.com/ebca7f88ae00e7b54d4f3d0b6bdca4b7/invoke.js"></script>
-</div>
-<div id="grid" class="grid"></div>
-
-<script>
-
-const JSON_URL = "https://raw.githubusercontent.com/shoaib8133/animal-data/df1e9d9e4ae267616281a99daca0210566caf72a/articles.json";
-
-async function loadPosts(){
-
-const res = await fetch(JSON_URL);
-const posts = await res.json();
-
-const grid=document.getElementById("grid");
-
-posts.forEach(post=>{
-
-const card=document.createElement("div");
-card.className="card";
-
-card.innerHTML=`
-<img src="${post.image}" loading="lazy">
-<h3>${post.title}</h3>
-<p>${post.description}</p>
-`;
-
-card.onclick=()=>{
-window.open(post.url,"_blank");
-};
-
-grid.appendChild(card);
-
-});
-
-}
-
-loadPosts();
-
-</script>
-
 </body>
 </html>
