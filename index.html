@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Cute Animals Daily</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#f2f2f2;
+}
+
+.grid{
+column-count:4;
+column-gap:15px;
+padding:15px;
+}
+
+.card{
+background:#fff;
+margin-bottom:15px;
+border-radius:10px;
+overflow:hidden;
+break-inside:avoid;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+cursor:pointer;
+}
+
+.card img{
+width:100%;
+}
+
+.card h3{
+padding:10px;
+font-size:16px;
+}
+
+.card p{
+padding:0 10px 10px;
+font-size:14px;
+color:#555;
+}
+
+</style>
+</head>
+
+<body>
+<!-- TOP ADSTERAA AD -->
+<div style="text-align:center; margin:20px 0;">
+  <script>
+    atOptions = {
+      'key' : 'ebca7f88ae00e7b54d4f3d0b6bdca4b7',
+      'format' : 'iframe',
+      'height' : 90,
+      'width' : 728,
+      'params' : {}
+    };
+  </script>
+  <script src="https://emotionalhabitat.com/ebca7f88ae00e7b54d4f3d0b6bdca4b7/invoke.js"></script>
+</div>
+<div id="grid" class="grid"></div>
+
+<script>
+
+const JSON_URL = "https://raw.githubusercontent.com/shoaib8133/animal-data/df1e9d9e4ae267616281a99daca0210566caf72a/articles.json";
+
+async function loadPosts(){
+
+const res = await fetch(JSON_URL);
+const posts = await res.json();
+
+const grid=document.getElementById("grid");
+
+posts.forEach(post=>{
+
+const card=document.createElement("div");
+card.className="card";
+
+card.innerHTML=`
+<img src="${post.image}" loading="lazy">
+<h3>${post.title}</h3>
+<p>${post.description}</p>
+`;
+
+card.onclick=()=>{
+window.open(post.url,"_blank");
+};
+
+grid.appendChild(card);
+
+});
+
+}
+
+loadPosts();
+
+</script>
+
+</body>
+</html>
